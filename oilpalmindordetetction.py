@@ -23,29 +23,10 @@ def predict_image(model, image):
     results = model(image)
     return results
 
-def predict_video(model, video_path):
-    cap = cv2.VideoCapture(video_path)
-    frames = []
-    class_counts = Counter()
-
-    while cap.isOpened():
-        ret, frame = cap.read()
-        if not ret:
-            break
-        results = model(frame)
-        for result in results:
-            for box in result.boxes:
-                class_id = int(box.cls[0])
-                class_counts[result.names[class_id]] += 1
-        frames.append(frame)
-
-    cap.release()
-    return frames, class_counts
-
 def draw_results(image, results):
     img = np.array(image)
     class_counts = Counter()
-
+    
     for result in results:
         for box in result.boxes:
             x1, y1, x2, y2 = map(int, box.xyxy[0])
@@ -58,37 +39,20 @@ def draw_results(image, results):
 
 st.title("Deteksi dan Klasifikasi Kematangan Buah Sawit")
 
-option = st.radio("Pilih tipe input", ("Gambar", "Video"))
-
 model_path = "best.pt"  # Ganti dengan path model Anda
 model = load_model(model_path)
 
-if option == "Gambar":
-    uploaded_file = st.file_uploader("Unggah gambar", type=["jpg", "png", "jpeg"])
-    if uploaded_file:
-        image = Image.open(uploaded_file)
-        st.image(image, caption="Gambar yang diunggah", use_column_width=True)
-
+uploaded_file = st.file_uploader("Unggah gambar", type=["jpg", "png", "jpeg"])
+if uploaded_file:
+    image = Image.open(uploaded_file)
+    st.image(image, caption="Gambar yang diunggah", use_column_width=True)
+    
+    if st.button("Predict"):  # Tombol untuk memulai prediksi
         results = predict_image(model, image)
         processed_image, class_counts = draw_results(image, results)
-
+        
         st.image(processed_image, caption="Hasil Deteksi", use_column_width=True)
-
+        
         st.subheader("Perhitungan Kelas Terdeteksi")
         for class_name, count in class_counts.items():
             st.write(f"{class_name}: {count}")
-
-elif option == "Video":
-    uploaded_video = st.file_uploader("Unggah video", type=["mp4", "avi", "mov"])
-    if uploaded_video:
-        video_path = f"temp_video.{uploaded_video.name.split('.')[-1]}"
-        with open(video_path, "wb") as f:
-            f.write(uploaded_video.getbuffer())
-
-        frames, class_counts = predict_video(model, video_path)
-
-        st.subheader("Perhitungan Kelas Terdeteksi")
-        for class_name, count in class_counts.items():
-            st.write(f"{class_name}: {count}")
-
-        st.video(video_path)
