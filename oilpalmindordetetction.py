@@ -6,19 +6,16 @@ import numpy as np
 from PIL import Image
 from collections import Counter
 
-@st.cache_resource
 def load_model(model_path):
-    return YOLO(model_path)
+    model = YOLO(model_path)
+    return model
 
 def predict_image(model, image):
-    image = np.array(image)
-    image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)  # Konversi ke format yang didukung YOLO
     results = model(image)
     return results
 
 def draw_results(image, results):
     img = np.array(image)
-    img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)  # Pastikan format warna benar
     class_counts = Counter()
     
     for result in results:
@@ -29,12 +26,17 @@ def draw_results(image, results):
             class_counts[result.names[class_id]] += 1
             cv2.rectangle(img, (x1, y1), (x2, y2), (0, 255, 0), 2)
             cv2.putText(img, label, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
-
-    return cv2.cvtColor(img, cv2.COLOR_BGR2RGB), class_counts  # Konversi kembali ke RGB
+    return img, class_counts
 
 st.title("Deteksi dan Klasifikasi Kematangan Buah Sawit")
 
-model_path = "best.pt"  # Ganti dengan path model Anda
+# Tampilkan ilustrasi gambar
+st.image("Buah-Kelapa-Sawit.jpg", use_column_width=True)
+
+# Pilihan model
+model_option = st.selectbox("Pilih model deteksi:", ["Indoor (best.pt)", "Outdoor (best1.pt)"])
+model_path = "best.pt" if model_option == "Indoor (best.pt)" else "best1.pt"
+
 model = load_model(model_path)
 
 uploaded_file = st.file_uploader("Unggah gambar", type=["jpg", "png", "jpeg"])
