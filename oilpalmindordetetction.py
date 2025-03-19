@@ -34,21 +34,20 @@ st.title("Deteksi dan Klasifikasi Kematangan Buah Sawit")
 st.image("Buah-Kelapa-Sawit.jpg", use_column_width=True)
 
 # Pilihan model
-model_option = st.selectbox("Pilih model deteksi:", ["Indoor : Untuk Data Buah Pada Mesin Gradig", "Outdoor : Untuk Data Buah Pekebunan"])
+model_option = st.selectbox("Pilih model deteksi:", ["Indoor (best.pt)", "Outdoor (best1.pt)"])
 model_path = "best.pt" if model_option == "Indoor (best.pt)" else "best1.pt"
-
-model = load_model(model_path)
 
 uploaded_file = st.file_uploader("Unggah gambar", type=["jpg", "png", "jpeg"])
 if uploaded_file:
     image = Image.open(uploaded_file)
-    st.image(image, caption="Gambar yang diunggah", use_column_width=True)
+    st.image(image, use_column_width=True)
     
     if st.button("Predict"):  # Tombol untuk memulai prediksi
+        model = load_model(model_path)  # Load model saat tombol ditekan
         results = predict_image(model, image)
         processed_image, class_counts = draw_results(image, results)
         
-        st.image(processed_image, caption="Hasil Deteksi", use_column_width=True)
+        st.image(processed_image, use_column_width=True)
         
         st.subheader("Perhitungan Kelas Terdeteksi")
         for class_name, count in class_counts.items():
