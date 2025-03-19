@@ -34,7 +34,7 @@ st.title("Deteksi dan Klasifikasi Kematangan Buah Sawit")
 st.image("Buah-Kelapa-Sawit.jpg", use_column_width=True)
 
 # Pilihan model
-model_option = st.selectbox("Pilih model deteksi:", ["Indoor (best.pt)", "Outdoor (best1.pt)"])
+model_option = st.selectbox("Pilih model deteksi:", ["Indoor : Untuk Data Buah Pada Mesin Gradig", "Outdoor : Untuk Data Buah Pekebunan"])
 model_path = "best.pt" if model_option == "Indoor (best.pt)" else "best1.pt"
 
 model = load_model(model_path)
